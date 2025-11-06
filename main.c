@@ -6,12 +6,9 @@ int main()
     // aloca pool memoria
     mymemory_t *memory = mymemory_init(1000);
 
-    //int v[32];
-    // int *v = malloc(sizeof(int)*32);
     int *v = mymemory_alloc(memory, sizeof(int)*32);
     for (int i = 0; i < 32; i++)
         v[i] = i+1;
-
 
     //int *v2 = mymemory_alloc(memory, sizeof(int)*16);
 

@@ -2,9 +2,8 @@
 #include <stdlib.h>
 #include "mymemory.h"
 
-// Função para criar a pool de memória
 mymemory_t* mymemory_init(size_t size) {
-    mymemory_t *memory = (mymemory_t*) malloc(sizeof(mymemory_t));
+    mymemory_t *memory = malloc(sizeof(mymemory_t));
     if (memory == NULL) {
         printf("Erro ao criar estrutura de memoria.\n");
         return NULL;
@@ -28,7 +27,7 @@ void* mymemory_alloc(mymemory_t *memory, size_t size) {
     if (memory == NULL || size == 0) return NULL;
 
     void *pool_start = memory->pool;
-    void *pool_end = (char*)memory->pool + memory->total_size;
+    void *pool_end = memory->pool + memory->total_size;
 
     allocation_t *atual = memory->head;
     allocation_t *anterior = NULL;
@@ -38,18 +37,18 @@ void* mymemory_alloc(mymemory_t *memory, size_t size) {
     // percorre a lista procurando o primeiro espaço livre
     while (atual != NULL) {
         void *inicio_bloco = atual->start;
-        size_t espaco_livre = (char*)inicio_bloco - (char*)posicao;
+        size_t espaco_livre = inicio_bloco - posicao;
 
         if (espaco_livre >= size) {
             break;
         }
 
-        posicao = (char*)inicio_bloco + atual->size;
+        posicao = inicio_bloco + atual->size;
         anterior = atual;
         atual = atual->next;
     }
 
-    if ((char*)pool_end - (char*)posicao < size) {
+    if (pool_end - posicao < size) {
         printf("Nao ha espaco suficiente na pool!\n");
         return NULL;
     }
@@ -68,7 +67,6 @@ void* mymemory_alloc(mymemory_t *memory, size_t size) {
     return posicao;
 }
 
-// Função para "liberar" um pedaço da pool
 void mymemory_free(mymemory_t *memory, void *ptr) {
     if (memory == NULL || ptr == NULL) return;
 
@@ -95,7 +93,6 @@ void mymemory_free(mymemory_t *memory, void *ptr) {
     printf("Endereco nao encontrado dentro da pool.\n");
 }
 
-// Função para mostrar o estado da pool
 void mymemory_display(mymemory_t *memory) {
     if (memory == NULL) return;
 
@@ -116,7 +113,6 @@ void mymemory_display(mymemory_t *memory) {
     printf("----------------------\n");
 }
 
-// Função para liberar toda a pool
 void mymemory_cleanup(mymemory_t *memory) {
     if (memory == NULL) return;
 
@@ -173,7 +169,7 @@ void mymemory_stats(mymemory_t *memory) {
     }
 
     void *pos = memory->pool;
-    void *pool_end = (char*)memory->pool + memory->total_size;
+    void *pool_end = memory->pool + memory->total_size;
 
     allocation_t *node = sorted;
 
@@ -181,7 +177,7 @@ void mymemory_stats(mymemory_t *memory) {
         num_alocacoes++;
         total_alocado += node->size;
 
-        size_t espaco_livre = (char*)node->start - (char*)pos;
+        size_t espaco_livre = node->start - pos;
         if (espaco_livre > 0) {
             fragmentos_livres++;
             total_livre += espaco_livre;
@@ -189,11 +185,11 @@ void mymemory_stats(mymemory_t *memory) {
                 maior_livre = espaco_livre;
         }
 
-        pos = (char*)node->start + node->size;
+        pos = node->start + node->size;
         node = node->next;
     }
 
-    size_t espaco_final = (char*)pool_end - (char*)pos;
+    size_t espaco_final = pool_end - pos;
     if (espaco_final > 0) {
         fragmentos_livres++;
         total_livre += espaco_final;
