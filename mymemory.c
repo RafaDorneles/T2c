@@ -132,3 +132,81 @@ void mymemory_cleanup(mymemory_t *memory) {
 
     printf("Pool de memoria liberada.\n");
 }
+
+void mymemory_stats(mymemory_t *memory) {
+    if (memory == NULL) return;
+
+    size_t total_alocado = 0;
+    size_t total_livre = 0;
+    size_t maior_livre = 0;
+    int num_alocacoes = 0;
+    int fragmentos_livres = 0;
+
+    // se não existe alocacoes
+    if (memory->head == NULL) {
+        printf("\n--- Estatísticas da Memória ---\n");
+        printf("Nenhuma alocação feita.\n");
+        printf("Memória total livre: %zu bytes\n", memory->total_size);
+        printf("Maior bloco livre: %zu bytes\n", memory->total_size);
+        printf("Fragmentos livres: 1\n");
+        printf("------------------------------\n");
+        return;
+    }
+
+    allocation_t *sorted = NULL;
+    allocation_t *atual = memory->head;
+
+    while (atual != NULL) {
+        allocation_t *novo = atual;
+        atual = atual->next;
+
+        if (sorted == NULL || sorted->start > novo->start) {
+            novo->next = sorted;
+            sorted = novo;
+        } else {
+            allocation_t *temp = sorted;
+            while (temp->next != NULL && temp->next->start < novo->start)
+                temp = temp->next;
+            novo->next = temp->next;
+            temp->next = novo;
+        }
+    }
+
+    void *pos = memory->pool;
+    void *pool_end = (char*)memory->pool + memory->total_size;
+
+    allocation_t *node = sorted;
+
+    while (node != NULL) {
+        num_alocacoes++;
+        total_alocado += node->size;
+
+        size_t espaco_livre = (char*)node->start - (char*)pos;
+        if (espaco_livre > 0) {
+            fragmentos_livres++;
+            total_livre += espaco_livre;
+            if (espaco_livre > maior_livre)
+                maior_livre = espaco_livre;
+        }
+
+        pos = (char*)node->start + node->size;
+        node = node->next;
+    }
+
+    size_t espaco_final = (char*)pool_end - (char*)pos;
+    if (espaco_final > 0) {
+        fragmentos_livres++;
+        total_livre += espaco_final;
+        if (espaco_final > maior_livre)
+            maior_livre = espaco_final;
+    }
+
+    printf("\n--- Estatísticas da Memória ---\n");
+    printf("Número total de alocações: %d\n", num_alocacoes);
+    printf("Memória total alocada: %zu bytes\n", total_alocado);
+    printf("Memória total livre: %zu bytes\n", total_livre);
+    printf("Maior bloco livre: %zu bytes\n", maior_livre);
+    printf("Fragmentos livres: %d\n", fragmentos_livres);
+    printf("------------------------------\n");
+}
+
