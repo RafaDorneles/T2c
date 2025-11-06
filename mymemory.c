@@ -24,33 +24,48 @@ mymemory_t* mymemory_init(size_t size) {
     return memory;
 }
 
-// Função para "alocar" dentro da pool
 void* mymemory_alloc(mymemory_t *memory, size_t size) {
-    if (memory == NULL) return NULL;
+    if (memory == NULL || size == 0) return NULL;
 
-    size_t usado = 0;
+    void *pool_start = memory->pool;
+    void *pool_end = (char*)memory->pool + memory->total_size;
+
     allocation_t *atual = memory->head;
+    allocation_t *anterior = NULL;
 
+    void *posicao = pool_start;
+
+    // percorre a lista procurando o primeiro espaço livre
     while (atual != NULL) {
-        usado += atual->size;
+        void *inicio_bloco = atual->start;
+        size_t espaco_livre = (char*)inicio_bloco - (char*)posicao;
+
+        if (espaco_livre >= size) {
+            break;
+        }
+
+        posicao = (char*)inicio_bloco + atual->size;
+        anterior = atual;
         atual = atual->next;
     }
 
-    if (usado + size > memory->total_size) {
+    if ((char*)pool_end - (char*)posicao < size) {
         printf("Nao ha espaco suficiente na pool!\n");
         return NULL;
     }
 
-    void *endereco = (char*)memory->pool + usado;
-
     allocation_t *nova = (allocation_t*) malloc(sizeof(allocation_t));
-    nova->start = endereco;
+    nova->start = posicao;
     nova->size = size;
-    nova->next = memory->head; // insere no início da lista
-    memory->head = nova;
+    nova->next = atual;
 
-    printf("Alocou %zu bytes dentro da pool.\n", size);
-    return endereco;
+    if (anterior == NULL)
+        memory->head = nova; // insere no início da lista
+    else
+        anterior->next = nova; // insere depois do anterior
+
+    printf("Alocou %zu bytes dentro da pool (First Fit).\n", size);
+    return posicao;
 }
 
 // Função para "liberar" um pedaço da pool
