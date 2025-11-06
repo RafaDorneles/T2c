@@ -4,10 +4,6 @@
 
 mymemory_t* mymemory_init(size_t size) {
     mymemory_t *memory = malloc(sizeof(mymemory_t));
-    if (memory == NULL) {
-        printf("Erro ao criar estrutura de memoria.\n");
-        return NULL;
-    }
 
     memory->pool = malloc(size);
     if (memory->pool == NULL) {
@@ -19,13 +15,11 @@ mymemory_t* mymemory_init(size_t size) {
     memory->total_size = size;
     memory->head = NULL; // lista de alocações começa vazia
 
-    printf("Pool de memoria criada com %zu bytes.\n", size);
+    printf("Pool de memoria criada. \n");
     return memory;
 }
 
 void* mymemory_alloc(mymemory_t *memory, size_t size) {
-    if (memory == NULL || size == 0) return NULL;
-
     void *pool_start = memory->pool;
     void *pool_end = memory->pool + memory->total_size;
 
@@ -34,7 +28,7 @@ void* mymemory_alloc(mymemory_t *memory, size_t size) {
 
     void *posicao = pool_start;
 
-    // percorre a lista procurando o primeiro espaço livre
+    // procura o primeiro espaço livre
     while (atual != NULL) {
         void *inicio_bloco = atual->start;
         size_t espaco_livre = inicio_bloco - posicao;
@@ -68,8 +62,6 @@ void* mymemory_alloc(mymemory_t *memory, size_t size) {
 }
 
 void mymemory_free(mymemory_t *memory, void *ptr) {
-    if (memory == NULL || ptr == NULL) return;
-
     allocation_t *atual = memory->head;
     allocation_t *anterior = NULL;
 
@@ -94,9 +86,7 @@ void mymemory_free(mymemory_t *memory, void *ptr) {
 }
 
 void mymemory_display(mymemory_t *memory) {
-    if (memory == NULL) return;
-
-    printf("\n--- Estado da pool ---\n");
+    printf("\n--- Pool ---\n");
     printf("Tamanho total: %zu bytes\n", memory->total_size);
 
     allocation_t *atual = memory->head;
@@ -114,8 +104,6 @@ void mymemory_display(mymemory_t *memory) {
 }
 
 void mymemory_cleanup(mymemory_t *memory) {
-    if (memory == NULL) return;
-
     allocation_t *atual = memory->head;
     while (atual != NULL) {
         allocation_t *temp = atual;
