@@ -130,7 +130,7 @@ void mymemory_stats(mymemory_t *memory) {
     if (memory->head == NULL) {
         printf("\n--- Estatísticas da Memória ---\n");
         printf("Nenhuma alocação feita.\n");
-        printf("Memória total livre: %zu bytes\n", memory->total_size);
+        printf("Memoria livre: %zu bytes\n", memory->total_size);
         printf("Maior bloco livre: %zu bytes\n", memory->total_size);
         printf("Fragmentos livres: 1\n");
         printf("------------------------------\n");
@@ -140,6 +140,7 @@ void mymemory_stats(mymemory_t *memory) {
     allocation_t *sorted = NULL;
     allocation_t *atual = memory->head;
 
+    // faz o sort
     while (atual != NULL) {
         allocation_t *novo = atual;
         atual = atual->next;
@@ -186,9 +187,9 @@ void mymemory_stats(mymemory_t *memory) {
     }
 
     printf("\n--- Estatísticas da Memória ---\n");
-    printf("Número total de alocações: %d\n", num_alocacoes);
-    printf("Memória total alocada: %zu bytes\n", total_alocado);
-    printf("Memória total livre: %zu bytes\n", total_livre);
+    printf("Número de alocações feitas: %d\n", num_alocacoes);
+    printf("Total de memoria alocada: %zu bytes\n", total_alocado);
+    printf("Total de memoria livre: %zu bytes\n", total_livre);
     printf("Maior bloco livre: %zu bytes\n", maior_livre);
     printf("Fragmentos livres: %d\n", fragmentos_livres);
     printf("------------------------------\n");
